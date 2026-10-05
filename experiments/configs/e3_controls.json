@@ -1,0 +1,19 @@
+{
+  "seed": 1,
+  "photos": ["photo_pesto.jpeg"],
+  "gammas": [0.5],
+  "s_values": [0.8],
+  "message_lengths": [64],
+  "target_prompts": [
+    "a photograph of the same kitchen scene in the snow"
+  ],
+  "controls": ["correct", "wrong_key", "unwatermarked", "mismatch_G"],
+  "mismatch_guidance": 1,
+  "steps": 50,
+  "mix_weight": 0.93,
+  "guidance_scale": 3,
+  "decoder_inv_steps": 100,
+  "fpr": 1e-5,
+  "prc_t": 3,
+  "key_message_length": 512
+}

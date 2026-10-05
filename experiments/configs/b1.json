@@ -1,0 +1,12 @@
+{
+  "seed": 1,
+  "image": "photo_pesto.jpeg",
+  "base_prompt": "a food processor bowl of pesto on a kitchen counter",
+  "edit_prompt": "a food processor bowl of pesto on a kitchen counter in the snow",
+  "recon_prompt": "",
+  "steps": 50,
+  "mix_weight": 0.93,
+  "init_image_strength": 0.8,
+  "guidance_scale": 3,
+  "device": "cuda"
+}

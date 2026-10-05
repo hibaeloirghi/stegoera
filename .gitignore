@@ -1,0 +1,8 @@
+EDICT/
+PRC-Watermark/
+**/__pycache__/
+*.pyc
+logs/
+results/
+.conda/
+experiments/_insert_docs.py

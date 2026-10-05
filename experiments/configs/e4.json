@@ -1,0 +1,14 @@
+{
+  "seed": 1,
+  "steps": 50,
+  "mix_weight": 0.93,
+  "decoder_inv_steps": 100,
+  "jpeg_qualities": [90, 70, 50, 20],
+  "resize": true,
+  "gaussian_sigma": 0.02,
+  "center_crop": true,
+  "crop_frac": 0.875,
+  "fpr": 1e-5,
+  "prc_t": 3,
+  "message_length": 64
+}

@@ -1,0 +1,7 @@
+{
+  "test_num": 3,
+  "inf_steps": 50,
+  "model_id": "stabilityai/stable-diffusion-2-1-base",
+  "fpr": 0.00001,
+  "prc_t": 3
+}

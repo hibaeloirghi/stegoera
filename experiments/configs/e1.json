@@ -1,0 +1,11 @@
+{
+  "seed": 0,
+  "device": "cuda",
+  "jpeg_qualities": [null, 90, 70, 50, 20],
+  "message_lengths": [0, 64, 256, 512],
+  "sparsity_t": [2, 3],
+  "resize_roundtrip": [false, true],
+  "decoder_inv_steps": 100,
+  "fpr": 1e-5,
+  "key_message_length": 512
+}

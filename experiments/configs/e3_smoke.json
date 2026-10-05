@@ -1,0 +1,19 @@
+{
+  "seed": 1,
+  "photos": ["photo_pesto.jpeg"],
+  "gammas": [0.0, 1.0],
+  "s_values": [0.8],
+  "message_lengths": [0, 64],
+  "target_prompts": [
+    "a food processor bowl of pesto on a kitchen counter in the snow"
+  ],
+  "controls": ["correct", "wrong_key"],
+  "steps": 50,
+  "mix_weight": 0.93,
+  "guidance_scale": 3,
+  "mismatch_guidance": 1,
+  "decoder_inv_steps": 100,
+  "fpr": 1e-5,
+  "prc_t": 3,
+  "key_message_length": 512
+}
