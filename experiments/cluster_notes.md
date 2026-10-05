@@ -20,7 +20,7 @@ QOS walltimes of interest: `default` MaxWall=3 days; `medium` 2 days; `high` 1 d
 
 `mc2` partition is CPU-only (legacy nodes). `scavenger` is preemptible and requires `--account=scavenger`.
 
-**Choice used in scripts (please confirm):** `--partition=tron --account=nexus --qos=default`. GPU type `--gres=gpu:rtxa5000:1` (24 GB) because a 1-minute `srun --gres=gpu:1` landed on an **RTX 3070 8 GB**, which is too small for SD 1.4 in float64.
+QOS `default` on account `nexus` has **MaxTRESPerJob = cpu=4,gres/gpu=1,mem=32G**. Job 7756897 with 8 CPUs sat in `QOSMaxCpuPerJobLimit`. All SLURM scripts now request at most 4 CPUs, 32G, 1 GPU.
 
 ## GPU / CPU partitions (abbrev.)
 

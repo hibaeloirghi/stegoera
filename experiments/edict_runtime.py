@@ -35,6 +35,12 @@ def load_models(device="cuda"):
 
     if ef.unet is None:
         ef.load_edict_models(device_arg=device)
+    # float64 SD attention maps OOM on 24 GB; slice size 1 is still exact, just slower.
+    if hasattr(ef.unet, "set_attention_slice"):
+        try:
+            ef.unet.set_attention_slice(1)
+        except Exception as exc:
+            print("attention slice not set:", exc)
     return ef
 
 
@@ -60,6 +66,7 @@ def alpha_bar_at(scheduler, t) -> float:
     return float(val)
 
 
+@torch.no_grad()
 def encode_image_to_x0(ef, image, generator=None):
     """x0 = 0.18215 * VAE_enc.sample(I). Shape (1,4,64,64) float64.
 
@@ -73,6 +80,7 @@ def encode_image_to_x0(ef, image, generator=None):
     return x0
 
 
+@torch.no_grad()
 def decode_latent(ef, latent):
     image = ef.vae.decode(latent.to(ef.vae.dtype) / VAE_SCALE).sample
     return tensor_to_pil(image)
@@ -107,6 +115,7 @@ def _noise_pred(ef, latent_model_input, t, emb_u, emb_c, guidance_scale):
     return noise_u + guidance_scale * (noise_c - noise_u)
 
 
+@torch.no_grad()
 def coupled_loop(
     ef,
     prompt: str,

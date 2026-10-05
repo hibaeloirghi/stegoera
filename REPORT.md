@@ -11,9 +11,11 @@ Discovery-only (login + 1-minute `srun`):
 | cluster-disc | tron / nexus / default | tron64 | HF and GitHub HTTP 200; cannot mkdir `/fs/nexus-scratch/eloirghi` |
 | gpu-disc | tron / nexus / default, `--gres=gpu:1` | tron64 | **RTX 3070 8 GB** — too small for SD 1.4 float64 |
 
-Environment / GPU experiment jobs: see later updates in this file (submitted after `experiments/slurm/setup_env.sh`).
-
-**Not yet run at the time of the first draft of this report:** B1–B2, E1–E4. They wait on the conda env and on SD 1.4 download (may need a Hugging Face token).
+| job id | name | state | notes |
+|---|---|---|---|
+| 7756897 | edict-prc-setup | CANCELLED | 8 CPUs hit `QOSMaxCpuPerJobLimit` (default QOS max is 4 CPU / 1 GPU / 32G) |
+| 7756898 | edict-prc-setup | COMPLETED 12:40 | Python 3.11 + torch 2.1.0+cu121. CLIP and **SD 1.4 downloaded without a token**. `stabilityai/stable-diffusion-2-1-base` failed **401** (B2 needs a HF token). CUDA false because this job was CPU-only. |
+| 7757358 | b1-edict | submitted | EDICT edit + null recon on `photo_pesto.jpeg` |
 
 ## 2. Upstream-file changes (`# [EXP]` lines)
 
