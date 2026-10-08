@@ -1,0 +1,18 @@
+{
+ "key_vector_files": [
+  "results/receiver_aligned/saved_states/r1_smoke_7788181_key.pkl",
+  "results/receiver_aligned/raw_observations/r1_smoke_7788181_true_site_carrier.pt"
+ ],
+ "n": 16384,
+ "r_checks": 15777,
+ "t": 3,
+ "sign_agreement_stego_vs_codeword": 0.49273681640625,
+ "sign_agreement_stego_vs_otp_pattern": 0.493408203125,
+ "sign_agreement_stego_vs_minus_otp_pattern": 0.506591796875,
+ "parity_pass_rate_stego": 0.5452874437472269,
+ "parity_pass_rate_embedded_codeword": 0.9506243265513089,
+ "parity_pass_rate_random_signs": 0.4963934841858402,
+ "corr_h_codeword": -0.014841650435323752,
+ "carrier_rms": 0.9308840664650719,
+ "frac_coords_sign_matches_codeword_top10pct_abs": 0.4801708358755339
+}
