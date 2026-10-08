@@ -9,16 +9,17 @@ Written 2026-10-07 22:50 EDT by the second agent. Everything below was read from
 - Papers on disk: `/nfshomes/eloirghi/EDICT-paper.pdf`, `/nfshomes/eloirghi/gunn PRC image watermark.pdf`, chat export `/nfshomes/eloirghi/cursor_edict_and_prc_experiments.md`. **The OptMark PDF and `cursor_agent_chat_review_plan.md` were not found.** OptMark section numbers are therefore unverified (see `PAPER_CODE_MAP.md`). I did not invent any OptMark-to-code mapping. Please send the PDF if you want one.
 - Cluster: `tron / nexus / qos=default`, 4 CPU / 32 GB, one `rtxa6000` per job (48 GB). A second GPU job does not start while one runs (queue shows Priority/Resources behind `ra-d0`).
 
-## Queue at write time
+## Jobs (updated 2026-10-08 12:00; queue is empty)
 
-| job | name | state | note |
-|---|---|---|---|
-| 7786379 | ra-d0 | RUNNING (2h02, limit 6h) | baseline case done (69 min/case); `top_g0.35` case in stage D; `s4_l0.10` still to run. Not touched. |
-| 7787914 | ra-upreg | PENDING | upstream-vs-custom regression, S=10, edit prompt, per-event compare |
-| 7788045 | ra-gradchk | PENDING | validation gate: pair-map reproduction, fp32-UNet dtype test, autograd vs FD (6 tests) |
-| 7788181 | ra-r1smoke2 | PENDING, `afterok:7788045` | one R1 gradient smoke + true PNG evaluation + 2 controls |
+| job | name | outcome |
+|---|---|---|
+| 7786379 | ra-d0 | COMPLETED 3:26. 41 rows, 3 cases. No Detect/decode in any row. Signal survives pair map, VAE and PNG for the two fixed carriers; they are weak at the sender. |
+| 7787914 | ra-upreg | COMPLETED. Custom vs upstream EDICT, S=10: max abs 0.0 for inversion and generation (all 32 events each). |
+| 7788045 | ra-gradchk | COMPLETED. All 6 gated tests passed (fp32 UNet 16x faster, within 4e-6 of fp64; autograd vs FD 0.13 %). |
+| 7788181 | ra-r1smoke2 | COMPLETED 42 min. True saved-PNG: Detect True (margin +67.7), decode None, exact message False, LPIPS vs edit 0.0154. Wrong-key and baseline controls negative. |
+| 7793363 | ra-r1word | COMPLETED. The accepted carrier is NOT the codeword (agreement 0.493; parity pass rate 0.545 vs 0.951 for the codeword). |
 
-Finished this session: 7787904 `ra-audit` (CPU, 1:47), 7787969 `ra-cpu2` (CPU, 0:20, passed), 7788093 `ra-rawscore` (CPU, **invalid output**, see below). Finished earlier: 7786378 `ra-cpu` (passed, coverage reviewed: mixing identities, signs, margin vs Detect on n=512, exact-message check).
+Details: `OPTIMIZATION_REPORT.md`, `DIAGNOSTIC_REPORT.md`. Known defect: `r1_smoke.csv` last three rows have misaligned columns (re-aligned copy: `r1_smoke_7788181_true_rows_aligned.csv`).
 
 ## Findings that change how earlier numbers should be read
 
@@ -33,16 +34,13 @@ Finished this session: 7787904 `ra-audit` (CPU, 1:47), 7787969 `ra-cpu2` (CPU, 0
 ## What is validated and what is not (honest)
 
 Validated by a run: torch PRC margin equals `Detect`'s decision and numpy margin (n = 16384 key, 24 carrier cases) and autograd matches finite differences; idealized-carrier curve; shaping geometry; soft-bit convention.
-Written, **not yet run on GPU**: upstream regression, fp32-UNet dtype test, autograd FD through the model, R1 smoke. No claim is made about any of them until their jobs finish.
+Run since: upstream regression, fp32-UNet dtype test, autograd FD, R1 smoke (see above).
 
 ## Security / hygiene
 
 - **Please rotate the Hugging Face token that appeared in the earlier exported chat** if not already done. I did not read or print any credential. `.hf_token` is gitignored and was not opened.
 - No tokens were added to code, logs or reports.
 
-## Next, in order
+## Next (needs your decision)
 
-1. Let `ra-d0` finish (≈ 00:10 EDT). It is the only owner of the GPU slot.
-2. `ra-upreg` and `ra-gradchk` run when the slot frees; read `results/receiver_aligned/upstream_regression/summary.json` and `gradcheck.csv`.
-3. `ra-r1smoke2` starts only if the gradcheck gate passes.
-4. Update `DIAGNOSTIC_REPORT.md` and `OPTIMIZATION_REPORT.md` with whatever those produce. Do not submit R2/R3/R4 or a new strength grid before that.
+Nothing further is submitted. R2/R3/R4, extra trials and noise grids are not run. The open question after the smoke is whether the loss can be made to push toward the true codeword (not just the detector statistic) at similar LPIPS.
