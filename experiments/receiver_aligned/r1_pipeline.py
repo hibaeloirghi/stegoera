@@ -46,6 +46,8 @@ class R1Config:
     mu_lpips: float = 20.0
     nu_mse: float = 5.0
     beta_pair: float = 0.0
+    a_sign: float = 0.0      # [v3] weight of the codeword-sign term; 0 reproduces the v1/v2 loss exactly
+    sign_width: float = 0.5
     c_energy: float = 50.0   # anchor on carrier energy; blocks the margin->0 amplitude-shrink shortcut
 
 
@@ -71,6 +73,12 @@ class R1Problem:
         margin, stat, thr = self.det.margin(h, cfg.sigma_squared)
         hinge = torch.clamp(cfg.tau - self.c * h, min=0).square().mean()
         l_code = cfg.a_hinge * hinge + cfg.b_margin * cfg.m0 * torch.nn.functional.softplus(-margin / cfg.m0)
+        # [v3] The margin only rewards parity-check satisfaction: job 7788181 raised it to +68 on the true PNG with
+        # sign agreement 0.493 to the embedded codeword (a different sign pattern). This term pulls h toward sign(c).
+        sgn = torch.sign(self.c)
+        sgn = torch.where(sgn == 0, torch.ones_like(sgn), sgn)
+        l_sign = cfg.a_sign * torch.nn.functional.softplus(-sgn * h / cfg.sign_width).mean() if cfg.a_sign > 0 else h.sum() * 0.0
+        l_code = l_code + l_sign
         # Detect returns margin == 0 (True) for all-zero soft bits and random carriers sit near -20, so
         # shrinking |h| raises the margin with NO code content. Anchor the carrier energy to its baseline value.
         l_energy = cfg.c_energy * ((h.square().mean() - self.v_ref) / self.v_ref) ** 2
@@ -81,7 +89,7 @@ class R1Problem:
         l_pair = cfg.beta_pair * pair_mse
         total = l_code + l_energy + l_q + l_pair
         return {
-            "total": total, "l_code": l_code, "l_energy": l_energy, "carrier_energy": h.square().mean(), "l_quality": l_q, "l_pair": l_pair,
+            "total": total, "l_sign": l_sign, "l_code": l_code, "l_energy": l_energy, "carrier_energy": h.square().mean(), "l_quality": l_q, "l_pair": l_pair,
             "margin": margin, "statistic": stat, "threshold": thr, "hinge": hinge,
             "lpips": lp, "pixel_mse": mse, "pair_mse": pair_mse,
             "h": h, "fin": fin, "img": img, "rec": rec,
