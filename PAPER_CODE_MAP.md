@@ -42,4 +42,24 @@ Not implemented. Sec. 3.3–3.5 (stage-wise embedding, quality constraints, adjo
 | Additive coupling `η = λ z_PRC` at S1–S4 | `experiments/hooks.py`, `make_embedding` 49–77 | Ran. No detection. S4 λ=0.10 was the strongest weak hit (agreement 0.545, LPIPS 0.016). |
 | Coherent same-sign window with `λ/sqrt(K)` | `make_embedding` 60–77 | Ran. `λ/sqrt(K)` equalizes the sum of injection energies, not recovered energy or LPIPS. |
 | Best-of-N codeword plus margin push `eps + λ c max(0, τ - c eps)` | `experiments/run_shape_stego.py` `shape_toward` 34–39, `select_codeword` | Task 0–1 finished and do not detect on the sender noise. Tasks 2–8 still queued. |
-| Receiver-aligned site objective (code margin, detector margin, LPIPS to the unwatermarked edit, pair penalty) | not written yet | Waits on the D0 ladder. |
+| Receiver-aligned site objective (code margin, detector margin, LPIPS to the unwatermarked edit, pair penalty, carrier-energy anchor) | `experiments/receiver_aligned/r1_pipeline.py` `R1Problem.evaluate` (lines 56–95); differentiable chain `diff_edict.py` `Chain.forward_steps` / `reverse_steps`; smoke driver `run_r1_smoke.py` | Written; gradcheck gate and smoke queued (see `OPTIMIZATION_REPORT.md`). **OUR PROPOSAL.** |
+| Differentiable copy of the parity margin | `prc_torch.py` `TorchDetector.margin` | CPU-verified against `Detect` (see AUDIT.md B). Smooth surrogate of the parity statistic, not the decoder. **OUR PROPOSAL.** |
+| float32 UNet fast path | `diff_edict.py` `load_unet32`, `GuidedEps` | Stock diffusers 0.21.4, same weights. Gated by `run_gradcheck.py` T3/T4. Not a paper object. |
+
+## Verification pass (handoff session)
+
+Checked against `EDICT-paper.pdf` and `gunn PRC image watermark.pdf` text extraction. **OptMark PDF was not found on disk** (not in `/nfshomes/eloirghi`, not in the workspace). Section numbers for OptMark below are therefore *unverified* and taken only from the handoff text; no OptMark equation is used anywhere in the code.
+
+| Paper item | Verified against paper | Local code (verified by reading) | Note |
+|---|---|---|---|
+| EDICT Eq. 1 `x_t = sqrt(α_t) x + sqrt(1-α_t) ε` | yes (EDICT-paper l.138) | `edict_runtime.py` `compose_xt` 293–296 | algebra only |
+| EDICT Eqs. 3–4 `a_t = sqrt(α_{t-1}/α_t)`, `b_t = −sqrt(α_{t-1}(1−α_t)/α_t) + sqrt(1−α_{t-1})` | yes (l.173–175) | `edict_functions.py` `forward_step` 698–727 (`first − second + third`), `reverse_step` 733–764 | with `alpha_quotient = sqrt(α_t/α_{t-1}) = 1/a_t`: `first = a_t x`, `second = a_t sqrt(1−α_t) ε`, `third = sqrt(1−α_{t-1}) ε`, so the return value `first − second + third` equals `a_t x + b_t ε` with `b_t` exactly Eq. 4 (algebra checked by hand) |
+| EDICT Eqs. 10–11 (coupling) | equation labels present (l.255, 264) | `coupled_loop` 187–244 | leapfrog: 208–218 |
+| EDICT Eqs. 12–13 (mixing, dilation), Fig. 5 | yes (l.292, 268, 252) | mix 237–239; unmix 195–197 | code inverts the two-line mix, not Eq. 13 as one line |
+| EDICT Eqs. 14–15 (full pair map and inverse), Table 1 | yes (l.295, 328, 312) | `generate_from_pair` 280–283, `invert_image` 268–277 | Table 1 floor not remeasured |
+| Gunn Sec. 3.2 footnote 5 (decoder inversion, Hong et al.) | yes (gunn.txt l.310): "gradient descent on z(0) to minimize ‖D(z(0)) − x‖, initializing with z(0) = E(x)" | `prc_runtime.py` `decoder_inv_vae` 78–106; repo default `n_steps=100`, jobs pass 50 | init is `latent_dist.sample` |
+| Gunn Alg. 1–4, 6–8 | yes (l.1485–1694) | `src/prc.py` KeyGen 71–115, Encode 126–138, Detect 151–170, Decode 183–220 | |
+| Gunn App. C.1 Fact 1, `erf(z'/sqrt(2σ²(1+σ²)))`, σ = std | yes (p. 23) | `pseudogaussians.py` 28–40 (`variances` = **σ²**) | see AUDIT.md D; earlier columns named `sigma` held σ² |
+| Gunn App. C.2 Thm 2 | yes | threshold in `Detect` 108–109 | host-adaptive use is outside the independence assumption |
+| Gunn App. C.3 (practical undetectability) | yes (l.1906); brute-force attack O(n^{t−1}); t = log2(n)/2 = 7 suggested for cryptographic undetectability | experiments use t = 3 | no security claim in this repo |
+| Gunn App. D (VAE demo) | yes (l.1957): same gradient decoder inversion on a CelebA VAE | — | only relevant as precedent for decoder inversion |
