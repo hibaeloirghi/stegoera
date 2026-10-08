@@ -1,0 +1,37 @@
+{
+  "objective": "Separate PRC-constraint failure from pair loss, VAE/PNG loss, and sigma selection. Do not run another additive sweep.",
+  "do_not_cancel": ["7783940"],
+  "jobs": [
+    {
+      "job_id": "7786378",
+      "name": "ra-cpu",
+      "script": "experiments/slurm/receiver_aligned/cpu_tests.sh",
+      "needs_gpu": false,
+      "depends_on": null,
+      "expected": "Mixing identities and Detect-versus-margin on n=512. A few minutes once scheduled."
+    },
+    {
+      "job_id": "7786379",
+      "name": "ra-d0",
+      "script": "experiments/slurm/receiver_aligned/d0.sh",
+      "needs_gpu": true,
+      "depends_on": "afterok:7786378",
+      "inputs": [
+        "results/edit_stego/sender_inversion_s0.8_S50_p0.93_seed1.pt",
+        "results/edit_stego/baseline.png",
+        "results/edit_stego/top_7f6b2dc5e9.png",
+        "results/edit_stego/coupling_single_98d8fd1b28.png"
+      ],
+      "outputs": [
+        "results/receiver_aligned/d0_ladder.csv",
+        "results/receiver_aligned/d0_meta.json",
+        "results/receiver_aligned/images/",
+        "results/receiver_aligned/raw_observations/"
+      ],
+      "passes_per_case": "1 prompted denoise, 6 matched inversions, 2 decoder inversions",
+      "cases": ["baseline", "top_g0.35", "s4_l0.10"],
+      "expected_runtime": "about 3 to 4 hours after a GPU is free, from the earlier 7 min per 40-step EDICT pass"
+    }
+  ],
+  "not_submitted": ["R1 optimization", "R2 pair-weight ablation", "R3 subspace carrier", "R4 two-site"]
+}

@@ -1,0 +1,39 @@
+{
+  "seed": 1,
+  "device": "cuda",
+  "image": "imagenet_dog_1.jpg",
+  "edit_prompt": "A golden retriever",
+  "steps": 50,
+  "s": 0.8,
+  "guidance_scale": 3,
+  "mix_weight": 0.93,
+  "k_fraction": 0.5,
+  "message_length": 64,
+  "key_message_length": 512,
+  "fpr": 1e-05,
+  "prc_t": 3,
+  "decoder_inv_steps": 50,
+  "inversion_cache": "/nfshomes/eloirghi/prc-in-edict/results/edit_stego/sender_inversion_s0.8_S50_p0.93_seed1.pt",
+  "baseline_png": "/nfshomes/eloirghi/prc-in-edict/results/edit_stego/baseline.png",
+  "cases": [
+    {
+      "id": "baseline",
+      "method": "baseline",
+      "historical_png": "/nfshomes/eloirghi/prc-in-edict/results/edit_stego/baseline.png"
+    },
+    {
+      "id": "top_g0.35",
+      "method": "top",
+      "gamma": 0.35,
+      "historical_png": "/nfshomes/eloirghi/prc-in-edict/results/edit_stego/top_7f6b2dc5e9.png"
+    },
+    {
+      "id": "s4_l0.10",
+      "method": "coupling_single",
+      "site": "S4",
+      "lambda": 0.1,
+      "k_fraction": 0.5,
+      "historical_png": "/nfshomes/eloirghi/prc-in-edict/results/edit_stego/coupling_single_98d8fd1b28.png"
+    }
+  ]
+}
