@@ -1,0 +1,41 @@
+{
+  "written": "2026-10-07T22:55-04:00",
+  "workspace": "/nfshomes/eloirghi/prc-in-edict",
+  "git_head": "25e4fc6",
+  "git_note": "all receiver-aligned work is uncommitted at write time; nothing pushed",
+  "principal_case": {"photo": "imagenet_dog_1.jpg", "inversion": "null", "edit_prompt": "A golden retriever",
+                      "S": 50, "strength": 0.8, "p": 0.93, "guidance": 3.0, "n": 16384, "message_bits": 64, "t": 3, "F": 1e-05},
+  "key_reproducibility": "PRC KeyGen is NOT reproducible from its seed (otp/test bits/G use unseeded galois.GF.Random). Jobs from this session onward save the key; results of earlier cross-process re-scoring are invalid (AUDIT.md F).",
+  "jobs": [
+    {"id": 7786378, "name": "ra-cpu", "state": "COMPLETED", "kind": "cpu", "outputs": ["results/receiver_aligned/test_cpu*.json"], "validity": "valid"},
+    {"id": 7786379, "name": "ra-d0", "state": "RUNNING at write time", "kind": "gpu", "script": "experiments/slurm/receiver_aligned/d0.sh",
+     "outputs": ["results/receiver_aligned/d0_ladder.csv", "results/receiver_aligned/raw_observations/", "results/receiver_aligned/saved_states/"],
+     "pending_cases": ["top_g0.35 (stage D)", "s4_l0.10"], "validity": "rows valid (single process, single key); raw vectors cannot be rescored (key not saved)"},
+    {"id": 7787904, "name": "ra-audit", "state": "COMPLETED", "kind": "cpu", "outputs": ["results/receiver_aligned/audit_cpu.json", "results/receiver_aligned/audit_carrier_requirement.csv"], "validity": "valid"},
+    {"id": 7787969, "name": "ra-cpu2", "state": "COMPLETED", "kind": "cpu", "outputs": ["torch margin test output"], "validity": "valid"},
+    {"id": 7788093, "name": "ra-rawscore", "state": "COMPLETED", "kind": "cpu", "outputs": ["results/receiver_aligned/raw_scores_7788093.csv"],
+     "validity": "INVALID for watermarked vectors (regenerated key); see results/receiver_aligned/NOTE_raw_scores_7788093_INVALID.md"},
+    {"id": 7787914, "name": "ra-upreg", "state": "PENDING", "kind": "gpu", "script": "experiments/slurm/receiver_aligned/upstream_regression.sh",
+     "outputs": ["results/receiver_aligned/upstream_regression/{summary.json,events.csv,pairs.pt}"]},
+    {"id": 7788045, "name": "ra-gradchk", "state": "PENDING", "kind": "gpu", "script": "experiments/slurm/receiver_aligned/gradcheck.sh",
+     "outputs": ["results/receiver_aligned/gradcheck.csv", "results/receiver_aligned/gradcheck_summary.json"], "gate_for": 7788181},
+    {"id": 7788181, "name": "ra-r1smoke2", "state": "PENDING", "kind": "gpu", "dependency": "afterok:7788045",
+     "script": "experiments/slurm/receiver_aligned/r1_smoke_v2.sh",
+     "outputs": ["results/receiver_aligned/r1_smoke.csv", "results/receiver_aligned/images/", "results/receiver_aligned/saved_states/", "results/receiver_aligned/raw_observations/"],
+     "rows": ["optimization curve", "true_png_decoder_inversion_fp64", "control_wrong_key_true_png", "control_unwatermarked_baseline_true_png"]}
+  ],
+  "cancelled_not_by_this_session": [
+    {"id": "7783940_[2-8]", "note": "cancelled by this account at 20:44:31 on 2026-10-07, no approval record found; not evaluated, not failed"},
+    {"id": 7757586, "note": "b3-hook, cancelled after 8:43 runtime"},
+    {"id": 7788046, "note": "r1_smoke v1 (never started), cancelled by this session when the key fix made it obsolete; replaced by 7788181"}
+  ],
+  "not_submitted": [
+    "R2 pair-consistency ablation",
+    "R3 / R4 (receiver-in-the-loop variants, larger optimization)",
+    "any new noise-strength grid",
+    "multi-photo / multi-prompt runs",
+    "rerun of shaping lambda=0.15 with a consistent key"
+  ],
+  "missing_inputs": ["OptMark PDF", "cursor_agent_chat_review_plan.md"],
+  "report_files": ["HANDOFF_STATUS.md", "AUDIT.md", "PAPER_CODE_MAP.md", "DIAGNOSTIC_REPORT.md", "OPTIMIZATION_REPORT.md"]
+}
