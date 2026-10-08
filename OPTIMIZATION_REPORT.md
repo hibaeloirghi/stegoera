@@ -51,3 +51,28 @@ What I do not know: whether the same optimizer reaches the codeword if the loss 
 ## Provenance
 
 Job 7788181, code hash `5a5a241890b3df94`, experiment git `efddc0c`, EDICT `a11504a`, PRC `4f8e09b`. Key saved: `saved_states/r1_smoke_7788181_key.pkl`. Optimization 670 s; true evaluation 1009 s.
+
+---
+
+# Run 2: codeword-sign term (job 7793436, 2026-10-08)
+
+Change vs run 1 (everything else identical, same photo/prompt, new key `otp0bc2fe711d81_tbf2f9c57f6ecb_G6cdd1c80818b`): added `a_sign=30 · mean softplus(−sign(c)·h / 0.5)` to `L_code`; 16 Adam steps, lr 0.03 (run 1: 8 steps, lr 0.02). Per-job CSV `r1_codeword_7793436.csv` (union schema, no misalignment). Final iterate reported. ~54 min wall (75 s per step, ~17 min true evaluation).
+
+Surrogate curve: margin −19.1 → +137.2; sign agreement with the codeword 0.5015 → 0.5451 (still rising ≈ 0.004 per step at the end, not saturated); LPIPS vs edit 0 → 0.0264 (flat from step 7); pixel MSE 0 → 0.041 (still rising).
+
+True channel, saved/reloaded PNG, decoder inversion, fp64:
+
+| | margin (v = 1.5) | detect | decode_non_none | exact_message_match | sign agreement | LPIPS vs edit | edit alignment |
+|---|---|---|---|---|---|---|---|
+| stego PNG, true key | +112.3 | True | False | False | 0.535 | 0.0265 | 0.236 |
+| baseline edit PNG, same key | −18.2 | False | False | False | 0.500 | 0 | – |
+| stego PNG, independent wrong key | −17.7 | False | False | False | – | – | – |
+
+overall_success = False.
+
+Reading:
+1. The sign term does what it was added for, but slowly: agreement with the real codeword rose to 0.535 on the true PNG (run 1: 0.493), i.e. the carrier now carries some codeword content. It is far below the ≈ 0.63 / ≈ 0.67 that Detect-on-codeword and Decode needed on the idealized carrier, so decoding still returns nothing. Run 1 got Detect without the codeword; here Detect is again satisfied, now partly by codeword content but I have not re-run the parity analysis on this vector, so how much of the +112 comes from the codeword vs another pattern is not established.
+2. The surrogate overstates the true agreement (0.545 vs 0.535) and the true margin is lower than the surrogate's (112 vs 137), but the effect is much smaller than in run 1. Site error to the stego site 0.048 (encoder-mean level).
+3. Distortion: LPIPS to the unwatermarked edit is 0.0265 (run 1 0.0154), edit alignment 0.236 vs 0.250 baseline (a drop I have not interpreted; one image). Pixel MSE 0.041 is rising and not converged.
+4. No claim that more steps would reach decoding. Extrapolating a rate of 0.004/step to 0.63 would need ~ 20+ more steps and rising distortion; the rate may slow, and I have no evidence either way. The distortion budget at that point is unknown.
+5. Still one photo, one key, one seed. No R2/R3/R4 run.

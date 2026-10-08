@@ -123,6 +123,18 @@
     "results/receiver_aligned/r1_word_analysis_7793363.json"
    ],
    "validity": "valid, uses saved key"
+  },
+  {
+   "id": 7793436,
+   "name": "ra-r1code3",
+   "state": "COMPLETED (53:51): Detect True (+112.3), decode None, exact False, sign agreement 0.535, LPIPS vs edit 0.0265",
+   "kind": "gpu",
+   "script": "experiments/slurm/receiver_aligned/r1_codeword_v3.sh",
+   "outputs": [
+    "results/receiver_aligned/r1_codeword_7793436.csv",
+    "results/receiver_aligned/images/r1_codeword_7793436_*",
+    "results/receiver_aligned/saved_states/r1_codeword_7793436_*"
+   ]
   }
  ],
  "cancelled_not_by_this_session": [
