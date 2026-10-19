@@ -1,0 +1,47 @@
+# Plumbing check only (not a result): 1 iteration, 4 candidates, 2 decoder-inversion steps.
+experiment_id: cc_debug_tiny
+seed: 1
+device: cuda
+
+edict:
+  steps: 25                # S
+  strength: 0.7            # s; EDICT code: t_limit = S - int(S*s) = 8 -> 17 active steps (not 18)
+  mix_weight: auto         # p(S) = p_ref ** (50 / S) = 0.93**2 = 0.8649 at S = 25
+  p_ref: 0.93
+  base_prompt: ""
+  edit_prompt: ""
+  guidance_scale: 3.0      # irrelevant when edit_prompt == base_prompt == ""
+  k_fraction: 0.5          # site k = round(0.5 * (n - 1)) = 8 -> timestep 320
+
+prc:
+  key_message_length: 64
+  message_length: 64
+  fpr: 1.0e-5
+  t: 3
+  coset_candidates: 4
+
+carrier:
+  prc_block: carrier       # carrier: PRC key of length n_carrier on the masked coords; full: 16384 key
+  n_carrier: 2048          # or 4096
+  sigma_lo: 0.7
+  sigma_hi: 2.0
+  smooth: 2.0
+
+loss:
+  m_target: 20.0
+  gamma: 0.5
+  lambda_code: 20.0
+  lambda_vis: 20.0
+  nu_mse: 0.0
+  sigma_squared: 1.5
+
+optim:
+  iters: 1
+  lr: 0.03
+  unet_dtype: float32      # surrogate only; true channel is fp64 (validated: gradcheck job 7788045)
+  optimize_y: true
+
+receiver:
+  decoder_inv_steps: 2
+
+lpips_target: 0.015
