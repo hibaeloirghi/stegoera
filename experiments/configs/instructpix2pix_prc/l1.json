@@ -1,0 +1,22 @@
+{
+  "experiment": "instructpix2pix_prc",
+  "stage": "l1",
+  "model_id": "timbrooks/instruct-pix2pix",
+  "model_revision": "31519b5cb02a7fd89b906d88731cd4d6a7bbf88d",
+  "source_image": "results/instructpix2pix_prc/pair/images/00_source.png",
+  "instruction": "Turn the dog into a golden retriever.",
+  "saved_ddim_gaussian": "results/instructpix2pix_prc/pair/saved_states/ddim_gaussian.pt",
+  "saved_noise": "results/instructpix2pix_prc/pair/raw_noise.npz",
+  "key_path": "results/instructpix2pix_prc/raw_keys/cpu_controls_key.pkl",
+  "wrong_key_path": "results/instructpix2pix_prc/raw_keys/cpu_controls_wrong_key.pkl",
+  "expected_key_hash": "otpbc4dafb803c7_tba80a78948303_Gba71308104b6",
+  "num_inference_steps": 100,
+  "guidance_scale": 7.5,
+  "image_guidance_scale": 1.5,
+  "eta": 0.0,
+  "dtype": "float16",
+  "sigma_squared": 1.5,
+  "fixed_point_max_iter": 4,
+  "receiver_level": "L1",
+  "conditioning": "saved source-image latent and instruction embeddings from the forward pass"
+}

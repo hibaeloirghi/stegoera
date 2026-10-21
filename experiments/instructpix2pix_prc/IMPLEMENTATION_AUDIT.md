@@ -213,3 +213,17 @@ This scheduler is the quality check. It is not the recovery sampler.
 `clip_sample=false`, `steps_offset=1`, `set_alpha_to_one=false`, and the
 checkpoint beta schedule. `clip_sample` on the DDIM class defaults to true;
 the probe does not use that default.
+
+## L1 inverse
+
+`experiments/instructpix2pix_prc/ddim_invert.py` inverts
+`DDIMScheduler.step` (`scheduling_ddim.py` lines 407–453) at `eta=0`,
+`prediction_type=epsilon`, with `clip_sample` and `thresholding` off.
+For a fixed noise prediction the left inverse matches `step` to about `1e-6`
+on a CPU tensor. The denoiser is not fixed. Each inverse step evaluates the
+same three-branch InstructPix2Pix prediction used in the forward loop
+(pipeline lines 336–363) at the cleaner latent and at the forward timestep.
+That is the approximation. A capped fixed-point pass solves the actual
+`step` update only if the one-pass result misses the message or the
+ordinary-noise inversion correlation is below 0.99. Euler ancestral edits
+are not inverted, because that scheduler adds new noise on every step.
