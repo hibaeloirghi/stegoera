@@ -1,0 +1,19 @@
+{
+  "experiment": "instructpix2pix_prc",
+  "stage": "cpu_controls",
+  "model_id": "timbrooks/instruct-pix2pix",
+  "source_photo": "EDICT/experiment_images/imagenet_dog_1.jpg",
+  "source_photo_native_size": [500, 375],
+  "preprocess": "center-crop then Lanczos resize to 512, experiments/image_utils.py load_edict_image",
+  "preprocessed_size": 512,
+  "instruction": "Turn the dog into a golden retriever.",
+  "message_length": 64,
+  "false_positive_rate": 1e-5,
+  "t": 3,
+  "sigma": "standard deviation of z_recovered - z_initial",
+  "sigma_squared": 1.5,
+  "sigma_squared_code_argument": "pseudogaussians.recover_posteriors variances",
+  "message_rng_seed": 0,
+  "gaussian_rng_seed": 123,
+  "note": "KeyGen seeds do not reproduce the generator matrix, one-time pad, or test bits. The saved key object is the key."
+}

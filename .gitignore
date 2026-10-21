@@ -6,3 +6,9 @@ logs/
 results/
 .conda/
 experiments/_insert_docs.py
+.hf_token
+**/.hf_token
+*.token
+.env
+EDICT/hf_auth
+raw_keys/
