@@ -178,3 +178,38 @@ variance. The predeclared value is `1.5`, so `sigma = sqrt(1.5)`.
 `t=3` is the requested sparsity. Appendix C.3 of the Gunn paper says this
 concrete setting is not cryptographically undetectable. The CPU controls do
 not change `t`.
+
+## Checkpoint record from job 7948380
+
+`timbrooks/instruct-pix2pix`, revision `31519b5cb02a7fd89b906d88731cd4d6a7bbf88d`.
+Public, not gated. Hub license field: `mit`. Pipeline class matches.
+
+| field | value |
+| --- | --- |
+| scheduler class | `EulerAncestralDiscreteScheduler` |
+| UNet `in_channels` | 8 |
+| VAE `latent_channels` | 4 |
+| UNet `sample_size` | 64 |
+| generation shape at 512 | `[1, 4, 64, 64]`, `n=16384` |
+| VAE `scaling_factor` in the json | absent |
+| installed `AutoencoderKL` default | 0.18215 (`autoencoder_kl.py` line 96) |
+
+The scheduler json was written by Diffusers 0.12.0.dev0 and still contains
+DPM-solver fields (`algorithm_type`, `solver_order`, `solver_type`).
+`EulerAncestralDiscreteScheduler` does not use those fields. It does use
+`beta_start=0.00085`, `beta_end=0.012`, `beta_schedule=scaled_linear`,
+`prediction_type=epsilon`, `num_train_timesteps=1000`. `timestep_spacing` is
+absent, so the class default `linspace` applies (`scheduling_euler_ancestral_discrete.py`
+line 139). With that spacing, `init_noise_sigma` is `sigmas.max()` (lines
+173–176), not 1. The pair job records the value after `set_timesteps`.
+
+`step` draws a fresh Gaussian on every update (line 356) and adds it (line 358).
+This scheduler is the quality check. It is not the recovery sampler.
+
+`DDIMScheduler.step` adds noise only when `eta > 0` (`scheduling_ddim.py` lines
+455–468). Its previous-timestep update subtracts
+`num_train_timesteps // num_inference_steps` (line 407), which matches
+`timestep_spacing="leading"`. The DDIM probe uses that spacing, `eta=0`,
+`clip_sample=false`, `steps_offset=1`, `set_alpha_to_one=false`, and the
+checkpoint beta schedule. `clip_sample` on the DDIM class defaults to true;
+the probe does not use that default.

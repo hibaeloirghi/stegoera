@@ -1,0 +1,27 @@
+{
+  "experiment": "instructpix2pix_prc",
+  "stage": "pair",
+  "model_id": "timbrooks/instruct-pix2pix",
+  "model_revision": "31519b5cb02a7fd89b906d88731cd4d6a7bbf88d",
+  "source_photo": "EDICT/experiment_images/imagenet_dog_1.jpg",
+  "preprocess": "center-crop then Lanczos 512, experiments/image_utils.py load_edict_image",
+  "preprocessed_size": 512,
+  "instruction": "Turn the dog into a golden retriever.",
+  "source_caption": "a brown and white spaniel standing on a dirt path in front of green bushes",
+  "edit_noun": "a golden retriever",
+  "num_inference_steps": 100,
+  "guidance_scale": 7.5,
+  "image_guidance_scale": 1.5,
+  "dtype": "float16",
+  "key_path": "results/instructpix2pix_prc/raw_keys/cpu_controls_key.pkl",
+  "expected_key_hash": "otpbc4dafb803c7_tba80a78948303_Gba71308104b6",
+  "gaussian_rng_seed": 7,
+  "ancestral_generator_seed": 11,
+  "panel_order": [
+    "source",
+    "euler_gaussian",
+    "euler_prc",
+    "ddim_gaussian"
+  ],
+  "note": "Euler ancestral is the checkpoint scheduler and draws new noise every step. The DDIM image is a scheduler probe, not a watermark recovery."
+}
