@@ -72,18 +72,20 @@ def git_rev() -> str:
 
 def guided_noise(pipe, image_latents, prompt_embeds, guidance, image_guidance):
     def predict(latents, timestep):
-        model_input = torch.cat([latents] * 3)
-        model_input = pipe.scheduler.scale_model_input(model_input, timestep)
-        model_input = torch.cat([model_input, image_latents], dim=1)
-        noise = pipe.unet(model_input, timestep, encoder_hidden_states=prompt_embeds, return_dict=False)[0]
-        if hasattr(pipe.scheduler, "sigmas"):
-            raise RuntimeError("this DDIM scheduler is not supposed to expose sigmas")
-        noise_text, noise_image, noise_uncond = noise.chunk(3)
-        return (
-            noise_uncond
-            + guidance * (noise_text - noise_image)
-            + image_guidance * (noise_image - noise_uncond)
-        )
+        # The pipeline forward is under no_grad. Keeping the graph here filled an 11 GB GPU.
+        with torch.no_grad():
+            model_input = torch.cat([latents] * 3)
+            model_input = pipe.scheduler.scale_model_input(model_input, timestep)
+            model_input = torch.cat([model_input, image_latents], dim=1)
+            noise = pipe.unet(model_input, timestep, encoder_hidden_states=prompt_embeds, return_dict=False)[0]
+            if hasattr(pipe.scheduler, "sigmas"):
+                raise RuntimeError("this DDIM scheduler is not supposed to expose sigmas")
+            noise_text, noise_image, noise_uncond = noise.chunk(3)
+            return (
+                noise_uncond
+                + guidance * (noise_text - noise_image)
+                + image_guidance * (noise_image - noise_uncond)
+            )
 
     return predict
 
