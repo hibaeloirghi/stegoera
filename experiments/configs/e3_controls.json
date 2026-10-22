@@ -1,13 +1,12 @@
 {
   "seed": 1,
-  "photos": ["photo_pesto.jpeg"],
-  "gammas": [0.5],
+  "condition": "null_null",
+  "photos": ["imagenet_cat.jpg"],
+  "gammas": [1.0],
   "s_values": [0.8],
   "message_lengths": [64],
-  "target_prompts": [
-    "a photograph of the same kitchen scene in the snow"
-  ],
-  "controls": ["correct", "wrong_key", "unwatermarked", "mismatch_G"],
+  "target_prompts": [""],
+  "controls": ["correct", "wrong_key", "unwatermarked"],
   "mismatch_guidance": 1,
   "steps": 50,
   "mix_weight": 0.93,
@@ -15,5 +14,6 @@
   "decoder_inv_steps": 100,
   "fpr": 1e-5,
   "prc_t": 3,
-  "key_message_length": 512
+  "key_message_length": 512,
+  "note": "Small unconditional controls. mismatch_G omitted because there is no text condition to mismatch."
 }

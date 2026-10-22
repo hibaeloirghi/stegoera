@@ -1,0 +1,114 @@
+{
+  "seed": 1,
+  "device": "cuda",
+  "condition": "null_target",
+  "base_prompt": "",
+  "edit_prompt": "A golden retriever",
+  "image": "imagenet_dog_1.jpg",
+  "steps": 50,
+  "decoder_inv_steps": 50,
+  "message_length": 64,
+  "key_message_length": 512,
+  "fpr": 1e-5,
+  "prc_t": 3,
+  "tasks": [
+    {
+      "method": "baseline",
+      "s": 0.8,
+      "guidance_scale": 3,
+      "mix_weight": 0.93
+    },
+    {
+      "method": "top",
+      "gamma": 0.05,
+      "s": 0.8,
+      "guidance_scale": 3,
+      "mix_weight": 0.93
+    },
+    {
+      "method": "top",
+      "gamma": 0.1,
+      "s": 0.8,
+      "guidance_scale": 3,
+      "mix_weight": 0.93
+    },
+    {
+      "method": "top",
+      "gamma": 0.2,
+      "s": 0.8,
+      "guidance_scale": 3,
+      "mix_weight": 0.93
+    },
+    {
+      "method": "top",
+      "gamma": 0.35,
+      "s": 0.8,
+      "guidance_scale": 3,
+      "mix_weight": 0.93
+    },
+    {
+      "method": "coupling_single",
+      "site": "S1",
+      "lambda": 0.03,
+      "k_fraction": 0.5,
+      "s": 0.8,
+      "guidance_scale": 3,
+      "mix_weight": 0.93
+    },
+    {
+      "method": "coupling_single",
+      "site": "S2",
+      "lambda": 0.03,
+      "k_fraction": 0.5,
+      "s": 0.8,
+      "guidance_scale": 3,
+      "mix_weight": 0.93
+    },
+    {
+      "method": "coupling_single",
+      "site": "S3",
+      "lambda": 0.03,
+      "k_fraction": 0.5,
+      "s": 0.8,
+      "guidance_scale": 3,
+      "mix_weight": 0.93
+    },
+    {
+      "method": "coupling_single",
+      "site": "S4",
+      "lambda": 0.01,
+      "k_fraction": 0.5,
+      "s": 0.8,
+      "guidance_scale": 3,
+      "mix_weight": 0.93
+    },
+    {
+      "method": "coupling_single",
+      "site": "S4",
+      "lambda": 0.03,
+      "k_fraction": 0.5,
+      "s": 0.8,
+      "guidance_scale": 3,
+      "mix_weight": 0.93
+    },
+    {
+      "method": "coupling_single",
+      "site": "S4",
+      "lambda": 0.1,
+      "k_fraction": 0.5,
+      "s": 0.8,
+      "guidance_scale": 3,
+      "mix_weight": 0.93
+    },
+    {
+      "method": "coupling_coherent",
+      "site": "S4",
+      "lambda": 0.03,
+      "k_fraction": 0.5,
+      "window_radius": 1,
+      "s": 0.8,
+      "guidance_scale": 3,
+      "mix_weight": 0.93
+    }
+  ]
+}

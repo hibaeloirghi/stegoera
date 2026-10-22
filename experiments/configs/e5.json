@@ -1,0 +1,13 @@
+{
+  "seed": 1,
+  "condition": "null_null",
+  "image": "imagenet_cat.jpg",
+  "steps": 50,
+  "init_image_strength": 0.8,
+  "mix_weight": 0.93,
+  "guidance_scale": 3,
+  "k_values": [5, 20, 35],
+  "sites": ["S1", "S4"],
+  "scales": [1.0, 0.1],
+  "decoder_inv_steps": 20
+}

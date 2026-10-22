@@ -105,11 +105,22 @@ def clip_embeddings(ef, prompt: str, null_prompt: str = ""):
         return_overflowing_tokens=True,
     )
     emb_u = ef.clip(uncond.input_ids.to(ef.device)).last_hidden_state
+    if prompt == null_prompt:
+        # Null-null guidance is exactly unconditional; avoid a duplicate CLIP/UNet pass.
+        return emb_u, emb_u
     emb_c = ef.clip(cond.input_ids.to(ef.device)).last_hidden_state
     return emb_u, emb_c
 
 
 def _noise_pred(ef, latent_model_input, t, emb_u, emb_c, guidance_scale):
+    if emb_c is emb_u:
+        return ef.unet(
+            latent_model_input, t, encoder_hidden_states=emb_u
+        ).sample
+    if guidance_scale == 1:
+        return ef.unet(
+            latent_model_input, t, encoder_hidden_states=emb_c
+        ).sample
     noise_u = ef.unet(latent_model_input, t, encoder_hidden_states=emb_u).sample
     noise_c = ef.unet(latent_model_input, t, encoder_hidden_states=emb_c).sample
     return noise_u + guidance_scale * (noise_c - noise_u)
@@ -131,6 +142,7 @@ def coupled_loop(
     null_prompt: str = "",
     leapfrog_steps: bool = True,
     run_baseline: bool = False,
+    step_hook=None,
 ):
     """Invert or generate a coupled (x,y) pair. Returns dict with latents, timesteps, alpha, cosine trace.
 
@@ -174,11 +186,20 @@ def coupled_loop(
     last_t = None
     for i, t in tqdm(enumerate(timesteps), total=len(timesteps), leave=False):
         last_t = t
+        affine_done = 0
         if reverse and (not run_baseline):
+            if step_hook is not None:  # [EXP] match edict_functions reverse S4
+                hooked = step_hook("S4", i, t, latent_pair, {"reverse": True, "phase": "before_unmix"})
+                if hooked is not None:
+                    latent_pair = hooked
             new_latents = [l.clone() for l in latent_pair]
             new_latents[1] = (new_latents[1].clone() - (1 - mix_weight) * new_latents[0].clone()) / mix_weight
             new_latents[0] = (new_latents[0].clone() - (1 - mix_weight) * new_latents[1].clone()) / mix_weight
             latent_pair = new_latents
+            if step_hook is not None:  # [EXP]
+                hooked = step_hook("S3", i, t, latent_pair, {"reverse": True, "phase": "after_unmix"})
+                if hooked is not None:
+                    latent_pair = hooked
 
         for latent_i in range(2):
             if run_baseline and latent_i == 1:
@@ -202,12 +223,25 @@ def coupled_loop(
             step_call = ef.reverse_step if reverse else ef.forward_step
             new_latent = step_call(scheduler, noise_pred, t, latent_base)
             latent_pair[li] = new_latent.to(latent_base.dtype)
+            affine_done += 1
+            if step_hook is not None:  # [EXP]
+                hooked = step_hook("S1" if affine_done == 1 else "S2", i, t, latent_pair, {"reverse": reverse, "updated_index": li})
+                if hooked is not None:
+                    latent_pair = hooked
 
         if (not reverse) and (not run_baseline):
+            if step_hook is not None:  # [EXP]
+                hooked = step_hook("S3", i, t, latent_pair, {"reverse": reverse})
+                if hooked is not None:
+                    latent_pair = hooked
             new_latents = [l.clone() for l in latent_pair]
             new_latents[0] = (mix_weight * new_latents[0] + (1 - mix_weight) * new_latents[1]).clone()
             new_latents[1] = ((1 - mix_weight) * new_latents[0] + (mix_weight) * new_latents[1]).clone()
             latent_pair = new_latents
+            if step_hook is not None:  # [EXP]
+                hooked = step_hook("S4", i, t, latent_pair, {"reverse": reverse})
+                if hooked is not None:
+                    latent_pair = hooked
 
         x, y = latent_pair[0].flatten(), latent_pair[1].flatten()
         cosine.append(

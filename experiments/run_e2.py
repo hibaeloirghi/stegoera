@@ -58,6 +58,7 @@ def main():
                 for i, c in enumerate(inv["cosine"]):
                     f.write(f"{i},{c}\n")
             row = {
+                "condition": cfg.get("condition", "null_null"),
                 "image": img_path.name,
                 "s": s,
                 "S": S,
@@ -69,6 +70,7 @@ def main():
                 "pixel_mse_vs_vae": pixel_mse(vae_only, recon),
                 "cosine_xy_final": inv["cosine"][-1] if inv["cosine"] else None,
                 "n_steps_run": len(inv["cosine"]),
+                "stream": "x",
             }
             append_csv(outdir / "e2.csv", row)
             print(row)

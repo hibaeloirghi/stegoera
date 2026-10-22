@@ -1,0 +1,28 @@
+{
+  "seed": 1,
+  "candidate_seed": 1000,
+  "random_sign_seed": 2024,
+  "device": "cuda",
+  "condition": "null_target",
+  "base_prompt": "",
+  "edit_prompt": "A golden retriever",
+  "image": "imagenet_dog_1.jpg",
+  "steps": 50,
+  "decoder_inv_steps": 50,
+  "message_length": 64,
+  "key_message_length": 512,
+  "fpr": 1e-05,
+  "prc_t": 3,
+  "n_candidates": 1024,
+  "tasks": [
+    {"method": "shape_top", "target": "prc", "lambda": 0.05, "tau": 1.0, "s": 0.8, "guidance_scale": 3, "mix_weight": 0.93},
+    {"method": "shape_top", "target": "prc", "lambda": 0.15, "tau": 1.0, "s": 0.8, "guidance_scale": 3, "mix_weight": 0.93},
+    {"method": "shape_top", "target": "prc", "lambda": 0.5, "tau": 1.0, "s": 0.8, "guidance_scale": 3, "mix_weight": 0.93},
+    {"method": "shape_top", "target": "prc", "lambda": 1.0, "tau": 1.0, "s": 0.8, "guidance_scale": 3, "mix_weight": 0.93},
+    {"method": "shape_top", "target": "random", "lambda": 1.0, "tau": 1.0, "s": 0.8, "guidance_scale": 3, "mix_weight": 0.93},
+    {"method": "shape_s4", "target": "prc", "lambda": 0.05, "tau": 1.0, "k_fraction": 0.5, "s": 0.8, "guidance_scale": 3, "mix_weight": 0.93},
+    {"method": "shape_s4", "target": "prc", "lambda": 0.15, "tau": 1.0, "k_fraction": 0.5, "s": 0.8, "guidance_scale": 3, "mix_weight": 0.93},
+    {"method": "shape_s4", "target": "prc", "lambda": 0.5, "tau": 1.0, "k_fraction": 0.5, "s": 0.8, "guidance_scale": 3, "mix_weight": 0.93},
+    {"method": "shape_s4", "target": "prc", "lambda": 1.0, "tau": 1.0, "k_fraction": 0.5, "s": 0.8, "guidance_scale": 3, "mix_weight": 0.93}
+  ]
+}

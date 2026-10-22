@@ -1,0 +1,24 @@
+# Two clean-channel epochs on four synthetic 32x32 covers. Target wall time under 2 minutes.
+seed: 0
+device: auto
+image_size: 32
+batch_size: 2
+epochs: 2
+steps_per_epoch: 2
+message_bits: 64
+target_ber: 0.10
+alpha: 0.15
+base_channels: 8
+lr: 0.001
+lambda_msg: 1.0
+lambda_perc: 0.2
+lambda_l1: 1.0
+lambda_adv: 0.01
+key: 7
+num_synthetic: 4
+eval_images: 4
+output_dir: results/smoke
+curriculum:
+  clean_until: 10
+  jpeg_until: 25
+  full_until: 50

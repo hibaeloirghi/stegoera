@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
 #SBATCH --time=04:00:00
-#SBATCH --array=0-3
+#SBATCH --array=0-2
 #SBATCH --output=/nfshomes/eloirghi/prc-in-edict/logs/%x_%A_%a.out
 #SBATCH --error=/nfshomes/eloirghi/prc-in-edict/logs/%x_%A_%a.err
 set -euo pipefail

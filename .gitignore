@@ -12,3 +12,4 @@ experiments/_insert_docs.py
 .env
 EDICT/hf_auth
 raw_keys/
+*.pdf

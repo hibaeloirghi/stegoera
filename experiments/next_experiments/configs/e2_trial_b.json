@@ -1,0 +1,39 @@
+{
+  "seed": 1,
+  "device": "cuda",
+  "image": "imagenet_dog_1.jpg",
+  "edit_prompt": "A golden retriever",
+  "steps": 50,
+  "s": 0.8,
+  "guidance_scale": 3.0,
+  "mix_weight": 0.93,
+  "message_length": 64,
+  "key_message_length": 512,
+  "fpr": 1e-05,
+  "prc_t": 3,
+  "decoder_inv_steps": 50,
+  "baseline_png": "/nfshomes/eloirghi/prc-in-edict/results/edit_stego/baseline.png",
+  "key_file": "/nfshomes/eloirghi/prc-in-edict/results/receiver_aligned/saved_states/r1_codeword_7793436_key.pkl",
+  "e2": {
+    "k": 20,
+    "sigma_squared": 1.5,
+    "site_scale": 1.0,
+    "tau": 0.5,
+    "a_cw": 20.0,
+    "b_det": 1.0,
+    "m_target": 20.0,
+    "tau_det": 5.0,
+    "mu_lpips": 20.0,
+    "nu_mse": 5.0,
+    "beta_pair": 0.0,
+    "c_energy": 50.0
+  },
+  "optim": {
+    "experiment_id": "e2_trial_b_saturated_det",
+    "iters": 16,
+    "lr": 0.03,
+    "unet_dtype": "float32",
+    "optimize_y": true,
+    "selection_rule": "report the FINAL iteration; no best-iteration picking. Full per-iteration curve is saved."
+  }
+}

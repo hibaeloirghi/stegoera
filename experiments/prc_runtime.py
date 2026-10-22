@@ -85,6 +85,9 @@ def decoder_inv_vae(vae, image, n_steps=100, lr=0.1, scale=VAE_SCALE, device=Non
     if device is None:
         device = image.device
     image = image.to(device=device)
+    # We optimize only z. Computing/accumulating gradients for every VAE weight is
+    # unnecessary and was the dominant receiver cost.
+    vae.requires_grad_(False)
     with torch.no_grad():
         z0 = vae.encode(image).latent_dist.sample() * scale
     z = z0.detach().clone().to(dtype=torch.float32 if image.dtype != torch.float64 else image.dtype)
@@ -101,6 +104,69 @@ def decoder_inv_vae(vae, image, n_steps=100, lr=0.1, scale=VAE_SCALE, device=Non
         opt.step()
         sched.step()
     return z.detach()
+
+
+def detection_margin(decoding_key, posteriors, false_positive_rate=None):
+    """Return (statistic, threshold, margin) using the same parity score as Detect.
+
+    margin = sum_j log((1+Pi_j)/2) - threshold. Detect is True iff margin >= 0.
+    """
+    (
+        _generator_matrix,
+        parity_check_matrix,
+        one_time_pad,
+        false_positive_rate_key,
+        noise_rate,
+        _test_bits,
+        _g,
+        _max_bp_iter,
+        t,
+    ) = decoding_key
+    fpr = false_positive_rate_key if false_positive_rate is None else false_positive_rate
+    signed = (1 - 2 * noise_rate) * (1 - 2 * np.array(one_time_pad, dtype=float))
+    values = signed * posteriors.detach().to(torch.float64).flatten().cpu().numpy()
+    r = parity_check_matrix.shape[0]
+    pi = np.prod(values[parity_check_matrix.indices.reshape(r, t)], axis=1)
+    log_plus = np.log((1 + pi) / 2)
+    log_minus = np.log((1 - pi) / 2)
+    log_prod = log_plus + log_minus
+    const = 0.5 * np.sum(np.power(log_plus, 2) + np.power(log_minus, 2) - 0.5 * np.power(log_prod, 2))
+    threshold = float(np.sqrt(2 * const * np.log(1 / fpr)) + 0.5 * log_prod.sum())
+    statistic = float(log_plus.sum())
+    return statistic, threshold, statistic - threshold
+
+
+def select_codeword(encoding_key, message, host_sign, host_weight, n_candidates, seed):
+    """Pick the valid encoding of `message` closest to the host in weighted Hamming distance.
+
+    Cost is sum_i |host_i| * 1[c_i != sign(host_i)]. Numpy RNG is restored afterward.
+    """
+    _, Encode, *_rest = prc_modules()
+    sign = host_sign.detach().to(torch.float64).flatten().cpu()
+    sign = torch.where(sign == 0, torch.ones_like(sign), torch.sign(sign))
+    weight = host_weight.detach().to(torch.float64).flatten().cpu().abs()
+    state = np.random.get_state()
+    best = None
+    try:
+        for i in range(int(n_candidates)):
+            np.random.seed(int(seed) + i)
+            codeword = Encode(encoding_key, message=message)
+            flat = codeword.detach().to(torch.float64).flatten().cpu()
+            mismatch = flat != sign
+            cost = float((weight * mismatch.to(weight.dtype)).sum().item())
+            agreement = float((~mismatch).to(torch.float64).mean().item())
+            weighted_agreement = 1.0 - cost / float(weight.sum().item())
+            if best is None or cost < best["cost"]:
+                best = {
+                    "codeword": codeword,
+                    "cost": cost,
+                    "agreement": agreement,
+                    "weighted_agreement": weighted_agreement,
+                    "candidate": i,
+                }
+    finally:
+        np.random.set_state(state)
+    return best
 
 
 def calibrate_variance(z_flat, decoding_key, grid=(0.5, 1.0, 1.5, 2.0, 3.0)):

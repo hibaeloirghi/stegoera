@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""E3: Edit-time PRC injection into EDICT noising of a real photo.
+"""E3: PRC injection into EDICT noising of a real photo.
 
-Sender knows original photo. Receiver does not: decoder-inv + EDICT invert with C_target.
+Default / intended path (real-image stego): invert AND denoise with the
+null/unconditional prompt C="". Receiver also inverts with C="".
+A nonempty C_target is optional and is not the focus.
 """
 import argparse
 import hashlib
@@ -29,7 +31,7 @@ def task_list(cfg):
     gammas = cfg.get("gammas", [0.0, 0.25, 0.5, 0.75, 1.0])
     ss = cfg.get("s_values", [0.5, 0.6, 0.7, 0.8])
     mlens = cfg.get("message_lengths", [0, 64, 256])
-    prompts = cfg.get("target_prompts", ["a photo in the snow"])
+    prompts = cfg.get("target_prompts", [""])
     controls = cfg.get("controls", ["correct"])
     # control names: correct, wrong_key, gamma0 already in gammas, unwatermarked, mismatch_G
     tasks = []
@@ -179,48 +181,59 @@ def main():
 
         G_recv = cfg.get("mismatch_guidance", 1) if control == "mismatch_G" else G_send
         recv_key = wrong_dec if control == "wrong_key" else dec_key
-        recv = receiver(ef, stego, prompt, S, pmix, s, G_recv, seed, recv_key, dec_steps)
-
-        agree, flip = pr.sign_agreement(recv["u"], z_prc)
+        condition = cfg.get("condition", "null_null")
+        recv_modes = ["matched"]
+        if condition == "null_target" and prompt.strip():
+            recv_modes = ["matched", "null_receiver"]
         lpips_val, lpips_err = lpips_distance(orig, stego, device=str(ef.device))
-        clip_val, clip_err = clip_score(stego, prompt, device=str(ef.device))
-        bit_acc = None
-        if recv["decoded_msg"] is not None and message is not None:
-            rec = np.array(recv["decoded_msg"])[: len(message)]
-            if rec.size == len(message):
-                bit_acc = float((rec == np.array(message)).mean())
+        if prompt.strip():
+            clip_val, clip_err = clip_score(stego, prompt, device=str(ef.device))
+        else:
+            clip_val, clip_err = None, "skipped_empty_prompt"
 
-        row = {
-            "tag": tag,
-            "photo": photo.name,
-            "prompt": prompt,
-            "control": control,
-            "gamma": g_use,
-            "s": s,
-            "message_length": mlen,
-            "G_send": G_send,
-            "G_recv": G_recv,
-            "t_final_send": inv["t_final"],
-            "alpha_t": alpha_t,
-            "t_final_recv": recv["t_final"],
-            "alpha_t_recv": recv["alpha_t"],
-            "stream": "x",
-            "pixel_mse": pixel_mse(orig, stego),
-            "lpips": lpips_val,
-            "lpips_error": lpips_err,
-            "clip_score": clip_val,
-            "clip_error": clip_err,
-            "sign_agree_u_vs_c": agree,
-            "sign_flip": flip,
-            "detect": recv["detect"],
-            "decode": recv["decode"],
-            "bit_acc": bit_acc,
-            "sigma": recv["sigma"],
-            "image": str(img_path),
-        }
-        append_csv(outdir / "e3.csv", row)
-        save_json({**row, **definition}, outdir / f"{tag}.json")
-        print(row)
+        for recv_mode in recv_modes:
+            recv_prompt = "" if recv_mode == "null_receiver" else prompt
+            recv = receiver(ef, stego, recv_prompt, S, pmix, s, G_recv, seed, recv_key, dec_steps)
+            agree, flip = pr.sign_agreement(recv["u"], z_prc)
+            bit_acc = None
+            if recv["decoded_msg"] is not None and message is not None:
+                rec = np.array(recv["decoded_msg"])[: len(message)]
+                if rec.size == len(message):
+                    bit_acc = float((rec == np.array(message)).mean())
+            row = {
+                "condition": condition,
+                "receiver_mode": recv_mode,
+                "tag": tag,
+                "photo": photo.name,
+                "prompt": prompt,
+                "recv_prompt": recv_prompt,
+                "control": control,
+                "gamma": g_use,
+                "s": s,
+                "message_length": mlen,
+                "G_send": G_send,
+                "G_recv": G_recv,
+                "t_final_send": inv["t_final"],
+                "alpha_t": alpha_t,
+                "t_final_recv": recv["t_final"],
+                "alpha_t_recv": recv["alpha_t"],
+                "stream": "x",
+                "pixel_mse": pixel_mse(orig, stego),
+                "lpips": lpips_val,
+                "lpips_error": lpips_err,
+                "clip_score": clip_val,
+                "clip_error": clip_err,
+                "sign_agree_u_vs_c": agree,
+                "sign_flip": flip,
+                "detect": recv["detect"],
+                "decode": recv["decode"],
+                "bit_acc": bit_acc,
+                "sigma": recv["sigma"],
+                "image": str(img_path),
+            }
+            append_csv(outdir / "e3.csv", row)
+            save_json({**row, **definition}, outdir / f"{tag}_{recv_mode}.json")
+            print(row)
 
 
 if __name__ == "__main__":

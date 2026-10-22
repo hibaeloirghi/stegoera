@@ -98,6 +98,7 @@ def main():
                         rec = np.array(decoded_msg)[: len(message)]
                         bit_acc = float((rec == np.array(message)).mean()) if rec.size else None
                     row = {
+                        "condition": cfg.get("condition", "null_null"),
                         "t": t,
                         "message_length": mlen,
                         "attack": attack,

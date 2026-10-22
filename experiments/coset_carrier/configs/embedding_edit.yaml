@@ -4,14 +4,16 @@ seed: 1
 device: cuda
 
 edict:
-  steps: 25                # S
-  strength: 0.7            # s; EDICT code: t_limit = S - int(S*s) = 8 -> 17 active steps (not 18)
-  mix_weight: auto         # p(S) = p_ref ** (50 / S) = 0.93**2 = 0.8649 at S = 25
+  # S=25, s=0.7 only denoised from t=640 (17 steps) and never turned the photo into the
+  # edit. Match the schedule that did: S=50, s=0.8, p=0.93 (40 steps, out to t=780).
+  steps: 50
+  strength: 0.8
+  mix_weight: 0.93
   p_ref: 0.93
   base_prompt: ""
   edit_prompt: "A golden retriever"
   guidance_scale: 3.0
-  k_fraction: 0.5          # site k = round(0.5 * (n - 1)) = 8 -> timestep 320
+  k_fraction: 0.5          # n=40 -> site k = 20, the previous S4 site
 
 prc:
   key_message_length: 64

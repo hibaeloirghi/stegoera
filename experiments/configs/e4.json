@@ -1,5 +1,6 @@
 {
   "seed": 1,
+  "condition": "null_null",
   "steps": 50,
   "mix_weight": 0.93,
   "decoder_inv_steps": 100,

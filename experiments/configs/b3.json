@@ -1,0 +1,9 @@
+{
+  "seed": 1,
+  "image": "imagenet_cat.jpg",
+  "steps": 8,
+  "init_image_strength": 1.0,
+  "mix_weight": 0.93,
+  "guidance_scale": 3,
+  "condition": "null_null"
+}

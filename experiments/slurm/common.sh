@@ -22,4 +22,10 @@ else
 fi
 hash -r
 echo "python=$(command -v python) $(python -c 'import sys; print(sys.version.split()[0])')"
+# Hugging Face token lives in a gitignored file; never echo it.
+if [[ -f "${WORKDIR}/.hf_token" ]]; then
+  export HF_TOKEN
+  HF_TOKEN="$(tr -d '[:space:]' < "${WORKDIR}/.hf_token")"
+  export HUGGING_FACE_HUB_TOKEN="${HF_TOKEN}"
+fi
 cd "$WORKDIR"

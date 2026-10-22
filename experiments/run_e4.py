@@ -101,6 +101,8 @@ def main():
             sigma_rec, soft, grid = pr.calibrate_variance(u, dec_key)
             det, dec_ok, _ = pr.detect_decode(dec_key, soft)
             row = {
+                "condition": rec.get("condition", cfg.get("condition", "null_null")),
+                "receiver_mode": rec.get("receiver_mode", "matched"),
                 "source_image": rec["image"],
                 "prompt": prompt,
                 "gamma": rec.get("gamma"),
@@ -109,6 +111,7 @@ def main():
                 "detect": det,
                 "decode": dec_ok,
                 "sigma": sigma_rec["variance"],
+                "stream": rec.get("stream", "x"),
                 "note": "PRC paper did not evaluate geometric attacks; centercrop is extra",
             }
             append_csv(outdir / "e4.csv", row)

@@ -1,0 +1,27 @@
+# Full curriculum. Set image_dir to a folder of photographs; otherwise synthetic covers are used.
+seed: 0
+device: auto
+image_size: 128
+image_dir: null
+batch_size: 4
+epochs: 50
+steps_per_epoch: 40
+message_bits: 64
+target_ber: 0.10
+alpha: 0.25
+base_channels: 32
+lr: 0.0002
+lambda_msg: 1.0
+lambda_perc: 1.0
+lambda_l1: 1.0
+lambda_adv: 0.001
+image_warmup_epochs: 5
+image_ramp_epochs: 5
+key: 7
+num_synthetic: 64
+eval_images: 16
+output_dir: results/train
+curriculum:
+  clean_until: 10
+  jpeg_until: 25
+  full_until: 50
