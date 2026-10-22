@@ -1,0 +1,21 @@
+{
+  "experiment": "ip2p_edict_prc",
+  "stage": "single_image",
+  "output_dir": "single_image",
+  "saved_pairs": "results/ip2p_edict_prc/milestone/pairs.pt",
+  "saved_png": "results/ip2p_edict_prc/milestone/images/prc_stream0.png",
+  "model_id": "timbrooks/instruct-pix2pix",
+  "model_revision": "31519b5cb02a7fd89b906d88731cd4d6a7bbf88d",
+  "instruction": "Turn the dog into a golden retriever.",
+  "num_inference_steps": 50,
+  "guidance_scale": 7.5,
+  "image_guidance_scale": 1.5,
+  "mix_weight": 0.93,
+  "leapfrog": true,
+  "sigma_squared": 1.5,
+  "saved_noise": "results/instructpix2pix_prc/pair/raw_noise.npz",
+  "key_path": "results/instructpix2pix_prc/pair/pair_encoding.pkl",
+  "wrong_key_path": "results/instructpix2pix_prc/raw_keys/cpu_controls_wrong_key.pkl",
+  "expected_key_hash": "otpbc4dafb803c7_tba80a78948303_Gba71308104b6",
+  "note": "Source-known tests on the saved golden-retriever x only. The inverse is given (x, x) or a VAE encode of the saved PNG duplicated. It is not given y and it is not given the original noise. The noise is used only after the inverse, to score the result. This is not blind recovery."
+}
