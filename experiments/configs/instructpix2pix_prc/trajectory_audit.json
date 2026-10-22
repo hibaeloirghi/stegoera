@@ -1,0 +1,19 @@
+{
+  "experiment": "instructpix2pix_prc",
+  "stage": "trajectory_audit",
+  "model_id": "timbrooks/instruct-pix2pix",
+  "model_revision": "31519b5cb02a7fd89b906d88731cd4d6a7bbf88d",
+  "saved_state": "results/instructpix2pix_prc/pair/saved_states/ddim_gaussian.pt",
+  "source_image": "results/instructpix2pix_prc/pair/images/00_source.png",
+  "instruction": "Turn the dog into a golden retriever.",
+  "guidance_scale": 7.5,
+  "image_guidance_scale": 1.5,
+  "num_inference_steps": 100,
+  "eta": 0.0,
+  "saved_forward_dtype": "float16",
+  "diagnostic_dtype": "float32",
+  "isolated_steps": [0, 1, 2, 50],
+  "chain_lengths": [1, 2, 3, 10, 100],
+  "fixed_point_max_iter": 4,
+  "note": "One replay of the saved DDIM Gaussian trajectory. No new prompts, images, or PRC encodings."
+}
