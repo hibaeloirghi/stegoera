@@ -1,0 +1,18 @@
+{
+  "image_id": "imagenet_dog_1",
+  "guide": "caption",
+  "target": "small",
+  "source_photo": "EDICT/experiment_images/imagenet_dog_1.jpg",
+  "source_photo_sha256": "ece278b0e08239c2cf8d6876d534a20e0e56c593fc7d70e2d828c0fec8151ca0",
+  "key_path": "results/full_prc_sign/key.pkl",
+  "key_sha256": "057d4b298cfa19b7bd877a4cda8bb27a1a5127216b3f684a2ffd454be3237c61",
+  "historical_png": "results/full_prc_sign/images/imagenet_dog_1__caption__small__prc.png",
+  "historical_png_sha256": "afa8f2fe6262241c0ce6b7e07ecc658166206946ab6b7b360e1bd4c95d75a3ee",
+  "historical_sign_agreement_x": 0.9219970703125,
+  "historical_sign_agreement_y": 0.924560546875,
+  "sign_agreement_tolerance": 0.02,
+  "historical_detect": true,
+  "historical_exact_message": true,
+  "guidance": 3.0,
+  "regression": true
+}
