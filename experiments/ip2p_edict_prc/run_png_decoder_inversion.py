@@ -232,7 +232,10 @@ def score_stream(recovered, z_prc, decoding_key, codeword, message, sigma_square
 
 
 def main():
-    cfg = json.loads(CONFIG_PATH.read_text())
+    global OUT
+    config_path = Path(sys.argv[1]) if len(sys.argv) > 1 else CONFIG_PATH
+    cfg = json.loads(config_path.read_text())
+    OUT = RESULTS / "ip2p_edict_prc" / cfg.get("output_dir", "png_decoder_inversion")
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "latent_checkpoints").mkdir(exist_ok=True)
     (OUT / "recovered_observations").mkdir(exist_ok=True)
@@ -246,7 +249,7 @@ def main():
         (ROOT / "experiments/ip2p_edict_prc/sampler.py").read_bytes()
         + Path(__file__).read_bytes()
     )
-    config_hash = sha256_file(CONFIG_PATH)
+    config_hash = sha256_file(config_path)
     image_hash = sha256_file(png_path)
     job_id = os.environ.get("SLURM_JOB_ID", "")
 
@@ -342,7 +345,7 @@ def main():
     )
     print("baseline reproduces previous failure", reproduces, flush=True)
     del decoding_key, message, codeword, z_prc, noise_file, key_codeword, _enc
-    if not reproduces:
+    if cfg.get("require_mode_failure", True) and not reproduces:
         return fail("ordinary VAE-mode receiver did not reproduce the previous PNG failure")
 
     def add_inversion(stage, image, image_id):
@@ -413,7 +416,7 @@ def main():
         for stream, recovered in enumerate(item["recovered"]):
             scored = score_stream(recovered, z_prc, decoding_key, codeword, message, sigma_squared)
             rows.append({
-                "experiment_id": "ip2p_edict_prc_png_decoder_inversion",
+                "experiment_id": cfg.get("experiment_id", "ip2p_edict_prc_png_decoder_inversion"),
                 "job_id": job_id,
                 "code_hash": code_hash,
                 "config_hash": config_hash,

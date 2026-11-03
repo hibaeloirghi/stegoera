@@ -1,0 +1,50 @@
+{
+  "experiment_id": "ip2p_edict_prc_short_message_recovery",
+  "output_dir": "short_message_recovery",
+  "model_id": "timbrooks/instruct-pix2pix",
+  "model_revision": "31519b5cb02a7fd89b906d88731cd4d6a7bbf88d",
+  "steps": 50,
+  "mix_weight": 0.93,
+  "leapfrog": true,
+  "guidance_scale": 7.5,
+  "image_guidance_scale": 1.5,
+  "negative_prompt": "",
+  "sigma_squared": 1.5,
+  "message_lengths": [8, 16],
+  "trials": [0, 1, 2],
+  "n": 16384,
+  "t": 3,
+  "false_positive_rate": 1e-5,
+  "expected_key_id": {
+    "8": "otpffc6bb0f0e36_tb4dc9b1fadb93_Gdd98d5ff5261",
+    "16": "otp574f439334ea_tb75f5e302334d_G8d58389545d9"
+  },
+  "existing_key_dir": "results/ip2p_edict_prc/short_payload_study/keys",
+  "magnitude_seed": 250000,
+  "message_seed": 260000,
+  "encode_seed": 270000,
+  "control_seed": 280000,
+  "decoder_inversion": {
+    "iterations": 100,
+    "checkpoints": [0, 25, 50, 100],
+    "learning_rate": 0.1,
+    "warmup_steps": 10,
+    "primary_iteration": 100,
+    "primary_stream": 1
+  },
+  "instructions": {
+    "bw": "Make the image black and white.",
+    "watercolor": "Render the image as a watercolor painting."
+  },
+  "images": [
+    ["imagenet_dog_1", "EDICT/experiment_images/imagenet_dog_1.jpg"],
+    ["imagenet_cat", "EDICT/experiment_images/imagenet_cat.jpg"],
+    ["imagenet_lake", "EDICT/experiment_images/imagenet_lake.jpg"]
+  ],
+  "pilot": {
+    "image_id": "imagenet_dog_1",
+    "instruction_id": "bw",
+    "trial": 0
+  },
+  "notes": "Instructions are global appearance changes. They avoid the InstructPix2Pix failure modes of counting, spatial rearrangement, viewpoint changes, moving objects, and isolating small objects. Wording is frozen. Keys are the existing 8-bit and 16-bit short-payload keys. New messages and Gaussian draws are independent of that study. A trial shares one magnitude tensor across both lengths and all six image/instruction cases. Codeword signs differ by length."
+}
