@@ -1,0 +1,16 @@
+# Packages for the separate Qwen environment. Torch 2.5.1+cu121 is installed first.
+# Diffusers 0.35.1 is the 2025-08-20 release that contains the Qwen-Image-Edit resize fix.
+diffusers==0.35.1
+transformers==4.55.2
+accelerate>=0.33,<2
+safetensors
+sentencepiece
+protobuf
+galois==0.4.1
+ldpc==0.1.51
+scipy
+numpy==1.26.4
+pillow
+pandas
+tqdm
+lpips

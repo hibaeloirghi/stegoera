@@ -1,0 +1,17 @@
+{
+  "procedure": "received_png_and_empty_user_instruction",
+  "model_id": "Qwen/Qwen-Image-Edit",
+  "revision": "ac7f9318f633fc4b5778c59367c8128225f1e3de",
+  "diffusers_version": "0.35.1",
+  "dtype": "bfloat16",
+  "quantization": false,
+  "true_cfg_scale": 4.0,
+  "guidance_scale": 1.0,
+  "negative_prompt": " ",
+  "user_instruction": "",
+  "num_inference_steps": 50,
+  "target_area": 1048576,
+  "soft_variance": 1.5,
+  "stochastic_sampling": false,
+  "notes": "The empty user instruction is the fixed receiver text. It is inserted into the pipeline's own prompt template. The received PNG is the only image. This file must not contain the sender's editing instruction."
+}
