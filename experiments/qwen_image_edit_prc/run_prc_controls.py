@@ -1,4 +1,4 @@
-"""CPU checks for one 8-bit PRC key sized to the Qwen generation noise.
+"""CPU checks for one PRC key sized to the Qwen generation noise.
 
 The block length comes from the photograph's edit canvas. The key objects are
 saved. A seed is not a substitute for those files. This script does not load
@@ -23,6 +23,7 @@ from experiments.qwen_image_edit_prc.prc_adapter import (
     describe_key,
     encode_message,
     generate_key,
+    key_basename,
     key_hash,
     load_sender_key,
     save_decoding_key_only,
@@ -49,9 +50,10 @@ def main() -> None:
         raise RuntimeError("payload length does not match message_bits")
     keys_dir = ROOT / cfg["keys_dir"]
     keys_dir.mkdir(parents=True, exist_ok=True)
-    sender_path = keys_dir / "len8_sender.pkl"
-    receiver_path = keys_dir / "len8_receiver.pkl"
-    wrong_path = keys_dir / "len8_wrong.pkl"
+    stem = key_basename(cfg["payload_length"])
+    sender_path = keys_dir / f"{stem}_sender.pkl"
+    receiver_path = keys_dir / f"{stem}_receiver.pkl"
+    wrong_path = keys_dir / f"{stem}_wrong.pkl"
     for path in (sender_path, receiver_path, wrong_path):
         if path.exists():
             raise FileExistsError(path)
@@ -60,7 +62,7 @@ def main() -> None:
     summary = describe_key(encoding_key)
     if summary["message_capacity"] != len(message):
         raise RuntimeError(
-            f"key capacity {summary['message_capacity']} is not the 8-bit payload"
+            f"key capacity {summary['message_capacity']} is not the {len(message)}-bit payload"
         )
     if summary["n"] != n or summary["t"] != int(cfg["t"]):
         raise RuntimeError("key parameters do not match the config")

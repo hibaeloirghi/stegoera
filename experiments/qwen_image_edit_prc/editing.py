@@ -107,6 +107,22 @@ def _capture(pipe, box: dict):
     return original_prepare, original_encode
 
 
+def park_on_cpu(pipe: QwenImageEditPipeline) -> None:
+    """Move every component off the GPU.
+
+    A direct transformer call leaves about 38 GiB resident. The text-encoder
+    offload hook does not evict that module, so the next prompt encode asks
+    for memory the 48 GiB card no longer has.
+    """
+    for name in ("text_encoder", "transformer", "vae"):
+        module = getattr(pipe, name, None)
+        if module is not None:
+            module.to("cpu")
+    if torch.cuda.is_available():
+        torch.cuda.synchronize()
+        torch.cuda.empty_cache()
+
+
 def run_forward(
     pipe: QwenImageEditPipeline,
     image: Image.Image,
@@ -118,6 +134,7 @@ def run_forward(
     guidance_scale: float,
 ):
     """One pipeline edit. The returned trajectory starts with the supplied noise."""
+    park_on_cpu(pipe)
     captured = {}
     trajectory = [packed_latents.detach().cpu()]
     original_prepare, original_encode = _capture(pipe, captured)
@@ -144,6 +161,9 @@ def run_forward(
     finally:
         pipe.prepare_latents = original_prepare
         pipe.encode_prompt = original_encode
+    images = output.images.detach().cpu() if torch.is_tensor(output.images) else output.images
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
     if "packed_latents" in captured:
         # This is the noise after the pipeline casts it, which is the Euler state.
         trajectory[0] = captured["packed_latents"]
@@ -151,7 +171,7 @@ def run_forward(
         "sigmas": pipe.scheduler.sigmas.detach().cpu(),
         "timesteps": pipe.scheduler.timesteps.detach().cpu(),
     }
-    return output.images, trajectory, captured, scheduler
+    return images, trajectory, captured, scheduler
 
 
 def predict_velocity(
@@ -161,7 +181,22 @@ def predict_velocity(
     conditioning: dict,
     true_cfg_scale: float,
 ) -> torch.Tensor:
-    """Guided velocity at one packed latent, using the pipeline's CFG formula."""
+    """Guided velocity at one packed latent, using the pipeline's CFG formula.
+
+    Inference mode matches ``__call__``, which is marked ``no_grad``. Tracking
+    gradients here retains the 60-layer activations and exhausts a 48 GiB GPU.
+    """
+    with torch.inference_mode():
+        return _predict_velocity(pipe, packed_latents, timestep, conditioning, true_cfg_scale)
+
+
+def _predict_velocity(
+    pipe: QwenImageEditPipeline,
+    packed_latents: torch.Tensor,
+    timestep: torch.Tensor,
+    conditioning: dict,
+    true_cfg_scale: float,
+) -> torch.Tensor:
     device = pipe._execution_device
     latents = packed_latents.to(device=device, dtype=pipe.transformer.dtype)
     image_latents = conditioning["image_latents"].to(device=device, dtype=latents.dtype)
@@ -239,6 +274,7 @@ def encode_png_conditioning(pipe, image: Image.Image, prompt: str, negative_prom
     The final latent estimate is the pipeline's VAE encode of this image, packed.
     That is not the sender's exact final latent.
     """
+    park_on_cpu(pipe)
     from diffusers.pipelines.qwenimage.pipeline_qwenimage_edit import calculate_dimensions
 
     width, height, _ = calculate_dimensions(1024 * 1024, image.size[0] / image.size[1])
@@ -248,33 +284,45 @@ def encode_png_conditioning(pipe, image: Image.Image, prompt: str, negative_prom
     resized = pipe.image_processor.resize(image, height, width)
     processed = pipe.image_processor.preprocess(resized, height, width).unsqueeze(2)
     device = pipe._execution_device
-    positive, positive_mask = pipe.encode_prompt(prompt=prompt, image=resized, device=device)
-    negative, negative_mask = pipe.encode_prompt(prompt=negative_prompt, image=resized, device=device)
-    _noise_shape = (
-        1,
-        1,
-        pipe.latent_channels,
-        2 * (height // multiple),
-        2 * (width // multiple),
-    )
-    zeros = torch.zeros(_noise_shape, device=device, dtype=positive.dtype)
-    _ignored, image_latents = pipe.prepare_latents(
-        processed.to(device=device, dtype=positive.dtype),
-        1,
-        pipe.latent_channels,
-        height,
-        width,
-        positive.dtype,
-        device,
-        None,
-        zeros,
-    )
-    # prepare_latents packs the supplied zeros as well. The image latents are
-    # the VAE source representation. Re-encode through the same normalize path
-    # and pack that tensor: it is the receiver's estimate of the final latent.
-    encoded = pipe._encode_vae_image(processed.to(device=device, dtype=positive.dtype), None)
-    latent_h, latent_w = encoded.shape[3:]
-    final_estimate = pipe._pack_latents(encoded, 1, pipe.latent_channels, latent_h, latent_w)
+    # The pipeline call is no_grad. This path is not, and the first prompt's
+    # activations otherwise stay allocated until the negative prompt encode.
+    with torch.inference_mode():
+        positive, positive_mask = pipe.encode_prompt(prompt=prompt, image=resized, device=device)
+        positive = positive.detach()
+        positive_mask = positive_mask.detach()
+        park_on_cpu(pipe)
+        negative, negative_mask = pipe.encode_prompt(prompt=negative_prompt, image=resized, device=device)
+        negative = negative.detach()
+        negative_mask = negative_mask.detach()
+        park_on_cpu(pipe)
+        _noise_shape = (
+            1,
+            1,
+            pipe.latent_channels,
+            2 * (height // multiple),
+            2 * (width // multiple),
+        )
+        zeros = torch.zeros(_noise_shape, device=device, dtype=positive.dtype)
+        _ignored, image_latents = pipe.prepare_latents(
+            processed.to(device=device, dtype=positive.dtype),
+            1,
+            pipe.latent_channels,
+            height,
+            width,
+            positive.dtype,
+            device,
+            None,
+            zeros,
+        )
+        # prepare_latents packs the supplied zeros as well. The image latents are
+        # the VAE source representation. Re-encode through the same normalize path
+        # and pack that tensor: it is the receiver's estimate of the final latent.
+        encoded = pipe._encode_vae_image(processed.to(device=device, dtype=positive.dtype), None)
+        latent_h, latent_w = encoded.shape[3:]
+        final_estimate = pipe._pack_latents(encoded, 1, pipe.latent_channels, latent_h, latent_w)
+        image_latents = image_latents.detach()
+        final_estimate = final_estimate.detach()
+    park_on_cpu(pipe)
     conditioning = {
         "positive_embeds": positive.detach().cpu(),
         "positive_mask": positive_mask.detach().cpu(),

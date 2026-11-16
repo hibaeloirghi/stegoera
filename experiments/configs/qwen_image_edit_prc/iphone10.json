@@ -1,0 +1,37 @@
+{
+  "prompts": "data/iphone_edits/prompts.txt",
+  "image_dir": "data/iphone_edits",
+  "image_pattern": "hiba_iphone_photo - {index}.png",
+  "sha256": {
+    "1": "821cf5f16769cb038cf2ba55e289690ce6984ddbe484578bd3d9bfa8d6048f50",
+    "2": "42dd1841125c1eaf0c57cf31e3b30374237c406a26b2ed1f0038fa6575d5e9a8",
+    "3": "1083e8e79ba272ce9d9bd4ceba0c3373de5f62e33ea1910a44d2fcf5f8efd0e6",
+    "4": "27a113623f85f0ad6e31b98fbf6a2131c5dba7caa4410deb395cc6e4ee705ede",
+    "5": "252f7cfa058e1424c3505562f1722ee98c9471c24b7b38c5ed5985de181d6332",
+    "6": "40f17393d32d31ab8d9382f8aac324df8decc4c6282aa9b14ec8a2761aa2a248",
+    "7": "ad3e2d4842e89f423be89a84e4616f17d7a89c16a8d90d30810729dc8b99c911",
+    "8": "a14410ecd08bb79077e4056c62d7fe366b5768b28a71aff62fc62d2e98b0fccb",
+    "9": "1271cb79c61febc75a1a9b87dadd611706d707da31d2b0e4b09ef67d3b6c901c",
+    "10": "5358b0fc6c1726a3beab4c48679ce385de5fa20e79e7779bbfeb9590c0b39eeb"
+  },
+  "payload_length": 120,
+  "trial": 0,
+  "negative_prompt": " ",
+  "true_cfg_scale": 4.0,
+  "guidance_scale": 1.0,
+  "num_inference_steps": 50,
+  "gaussian_seed_base": 850000,
+  "model_id": "Qwen/Qwen-Image-Edit",
+  "revision": "ac7f9318f633fc4b5778c59367c8128225f1e3de",
+  "receiver_settings": "experiments/configs/qwen_image_edit_prc/receiver_settings.json",
+  "keys_by_n": {
+    "265216": {
+      "keys_dir": "results/qwen_image_edit_prc/keys",
+      "controls_json": "results/qwen_image_edit_prc/prc_controls_len120.json"
+    },
+    "255744": {
+      "keys_dir": "results/qwen_image_edit_prc/keys_n255744",
+      "controls_json": "results/qwen_image_edit_prc/prc_controls_len120_n255744.json"
+    }
+  }
+}

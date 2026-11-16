@@ -28,14 +28,23 @@ PARITY_WEIGHT = 3
 FALSE_POSITIVE_RATE = 1e-5
 
 
+def key_basename(payload_length: int) -> str:
+    """File stem for a key whose capacity is exactly this payload length."""
+    length = int(payload_length)
+    if length <= 0:
+        raise RuntimeError("payload length must be positive")
+    return f"len{length}"
+
+
 def generate_key(n: int, message_length: int, seed: int):
     """Sample one key. The seed does not reproduce the galois one-time pad.
 
     The returned objects have to be saved. A later job must load them rather
-    than call this function again.
+    than call this function again. The caller checks that the key capacity
+    equals the payload, so a shorter message is not padded into a larger key.
     """
-    if message_length != 8:
-        raise RuntimeError("this chapter's first key is an 8-bit payload, not a padded longer key")
+    if int(message_length) <= 0:
+        raise RuntimeError("message length must be positive")
     return keygen(
         n=n,
         message_length=message_length,

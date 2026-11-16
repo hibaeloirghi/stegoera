@@ -39,7 +39,8 @@ from experiments.qwen_image_edit_prc.io_util import (  # noqa: E402
     write_json,
     write_tensor,
 )
-from experiments.qwen_image_edit_prc.prc_adapter import (  # noqa: E402
+from experiments.qwen_image_edit_prc.prc_adapter import (
+    key_basename,  # noqa: E402
     load_decoding_key_only,
     load_sender_key,
     score_latent,
@@ -100,7 +101,9 @@ def main() -> None:
     )
     trial_dir = ROOT / "results" / "qwen_image_edit_prc" / trial
     create_directory(trial_dir)
-    encoding_key, decoding_key, message, codeword = load_sender_key(ROOT / cfg["keys_dir"] / "len8_sender.pkl")
+    key_stem = key_basename(cfg["payload_length"])
+    key_dir = ROOT / cfg["keys_dir"]
+    encoding_key, decoding_key, message, codeword = load_sender_key(key_dir / f"{key_stem}_sender.pkl")
     message = [int(bit) for bit in message]
     if message != [int(bit) for bit in cfg["message_bits"]]:
         raise RuntimeError("saved message does not match the config")
@@ -196,20 +199,20 @@ def main() -> None:
     receiver_dir = trial_dir / "receiver_prc"
     receiver_result, estimated_c = recover(
         trial_dir / "prc.png",
-        ROOT / cfg["keys_dir"] / "len8_receiver.pkl",
+        key_dir / f"{key_stem}_receiver.pkl",
         ROOT / "experiments/configs/qwen_image_edit_prc/receiver_settings.json",
         receiver_dir,
         pipe=pipe,
     )
     scored_c = score_latent(decoding_key, estimated_c, message)
-    wrong_key = load_decoding_key_only(ROOT / cfg["keys_dir"] / "len8_receiver.pkl")
+    wrong_key = load_decoding_key_only(key_dir / f"{key_stem}_receiver.pkl")
     # Wrong-key control uses the sender wrong-key file's decoding key.
-    _wrong_enc, wrong_dec, _wrong_message, _wrong_code = load_sender_key(ROOT / cfg["keys_dir"] / "len8_wrong.pkl")
+    _wrong_enc, wrong_dec, _wrong_message, _wrong_code = load_sender_key(key_dir / f"{key_stem}_wrong.pkl")
     scored_wrong = score_latent(wrong_dec, estimated_c, message)
     del wrong_key
     gaussian_receiver, estimated_g = recover(
         trial_dir / "gaussian.png",
-        ROOT / cfg["keys_dir"] / "len8_receiver.pkl",
+        key_dir / f"{key_stem}_receiver.pkl",
         ROOT / "experiments/configs/qwen_image_edit_prc/receiver_settings.json",
         trial_dir / "receiver_gaussian",
         pipe=pipe,

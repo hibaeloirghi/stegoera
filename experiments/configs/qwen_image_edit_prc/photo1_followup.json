@@ -1,0 +1,24 @@
+{
+  "image": "data/iphone_edits/hiba_iphone_photo - 1.png",
+  "sha256": "821cf5f16769cb038cf2ba55e289690ce6984ddbe484578bd3d9bfa8d6048f50",
+  "payload_length": 120,
+  "keys_dir": "results/qwen_image_edit_prc/keys",
+  "controls_json": "results/qwen_image_edit_prc/prc_controls_len120.json",
+  "receiver_settings": "experiments/configs/qwen_image_edit_prc/receiver_settings.json",
+  "prior_summary": "results/qwen_image_edit_prc/iphone_len120_trial0/summary.json",
+  "output_dir": "results/qwen_image_edit_prc/photo1_followup",
+  "original_gaussian_seed": 850001,
+  "extra_seeds": [850011, 850021, 850031, 850041],
+  "failure_instruction": "make the cat's eye brown",
+  "sweep": [
+    {"id": "eye", "instruction": "make the cat's eye brown"},
+    {"id": "null", "instruction": "Leave the image unchanged."},
+    {"id": "watercolor", "instruction": "turn this into a watercolor painting."}
+  ],
+  "negative_prompt": " ",
+  "true_cfg_scale": 4.0,
+  "guidance_scale": 1.0,
+  "num_inference_steps": 50,
+  "model_id": "Qwen/Qwen-Image-Edit",
+  "revision": "ac7f9318f633fc4b5778c59367c8128225f1e3de"
+}

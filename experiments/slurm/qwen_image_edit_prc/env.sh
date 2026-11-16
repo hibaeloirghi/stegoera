@@ -10,6 +10,7 @@ export HF_HUB_CACHE="$HF_HOME"
 export TRANSFORMERS_CACHE="$HF_HOME"
 export PIP_CACHE_DIR="${SCRATCH}/pip_cache"
 export XDG_CACHE_HOME="${SCRATCH}/xdg_cache"
+mkdir -p "${XDG_CACHE_HOME}/torch/kernels"
 export PYTHONPATH="${WORKDIR}${PYTHONPATH:+:$PYTHONPATH}"
 export PYTORCH_CUDA_ALLOC_CONF="${PYTORCH_CUDA_ALLOC_CONF:-expandable_segments:True}"
 if [[ ! -x "${QWEN_ENV}/bin/python" ]]; then
